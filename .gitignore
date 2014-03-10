@@ -1,0 +1,12 @@
+configuration.rkt
+*.html
+manual/*
+bin/*
+/manual.html~
+/manual.md
+/racket.css
+/scribble-common.js
+/scribble.css
+/manual-racket.css
+/manual-style.css
+/manual-fonts.css
