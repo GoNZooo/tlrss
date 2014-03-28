@@ -12,7 +12,7 @@ Every bit of configuration is to be done in the file @bold{'configuration.rkt'}.
 These are the basic contents of the file that need to be defined exactly as follows. This is so that the right symbols are exported so they can be used in other files.
 
 @codeblock|{
-#lang racket
+#lang racket/base
 
 (provide downloads
 	 user-rss-url
