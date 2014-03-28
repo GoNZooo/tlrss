@@ -1,8 +1,8 @@
-#lang racket
+#lang racket/base
 
 (require xml
          xml/path
-         net/url)
+         racket/list)
 
 (provide get-items
          (struct-out rss-item))

@@ -1,8 +1,12 @@
-#lang racket
+#lang racket/base
 
 (require net/url
          xml
          racket/date
+         racket/list
+         racket/string
+         racket/port
+         racket/bool
 
          "xml-parse.rkt"
          "configuration.rkt")
