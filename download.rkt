@@ -47,8 +47,15 @@
     ;; user-specified downloads to look for.
     
     (define (match-downloads set)
-      (define (downloaded?)
-        (not (false? (member (rss-item-link i) downloaded))))
+
+      (define (downloaded? [dl-set downloaded])
+        (cond
+         [(null? dl-set) #f]
+         [(equal? (car (first dl-set))
+                  (rss-item-link i))
+          #t]
+         [else
+          (downloaded? (rest dl-set))]))
       
       (cond
        ;; If the set is empty, we return false.
@@ -90,22 +97,21 @@
   (define (cleanse set [output '()])
     ;; Function to clear old entries in a set
 
-    (define (too-old? entry)
+    (define (too-old?)
       ;; Function to determine if an entry is too old
       
-      (define (diff/2 t1 t2)
+      (define (time-diff)
         ;; Function that gets the time difference
         ;; between two times, returns seconds
         (- (current-seconds)
-                (cdr entry)))
+                (cdr (first set))))
 
-      (> (diff/2 (current-seconds)
-                 (cdr entry))
+      (> (time-diff)
          86400))
     
     (cond
      [(null? set) output]
-     [(too-old? (first set))
+     [(too-old?)
       (cleanse (rest set)
                output)]
      [else
@@ -135,6 +141,7 @@
          (get-items (get-rss-data)))
         (printf "~a - Fetched rss.~n"
                 (compose-current-time))))
+    
     (collect-garbage)
     (sleep 310)
 
