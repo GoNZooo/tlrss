@@ -107,11 +107,11 @@
      [(null? set) output]
      [(too-old? (first set))
       (cleanse (rest set)
-               (cons (first set)
-                     output))]
+               output)]
      [else
       (cleanse (rest set)
-               output)]))
+               (cons (first set)
+                     output))]))
   
   (begin
     (with-handlers ([exn:fail:network?
