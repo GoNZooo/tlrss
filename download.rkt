@@ -86,6 +86,32 @@
               (leading-zero (date-hour cd))
               (leading-zero (date-minute cd))
               (leading-zero (date-second cd)))))
+
+  (define (cleanse set [output '()])
+    ;; Function to clear old entries in a set
+
+    (define (too-old? entry)
+      ;; Function to determine if an entry is too old
+      
+      (define (diff/2 t1 t2)
+        ;; Function that gets the time difference
+        ;; between two times, returns seconds
+        (- (current-seconds)
+                (cdr entry)))
+
+      (> (diff/2 (current-seconds)
+                 (cdr entry))
+         86400))
+    
+    (cond
+     [(null? set) output]
+     [(too-old? (first set))
+      (cleanse (rest set)
+               (cons (first set)
+                     output))]
+     [else
+      (cleanse (rest set)
+               output)]))
   
   (begin
     (with-handlers ([exn:fail:network?
@@ -104,7 +130,7 @@
                  (url->file (rss-item-link rss-entry)
                             user-base-path))
                (set! downloaded
-                     (cons (rss-item-link rss-entry)
+                     (cons (cons (rss-item-link rss-entry) (current-seconds))
                            downloaded)))))
          (get-items (get-rss-data)))
         (printf "~a - Fetched rss.~n"
@@ -112,10 +138,7 @@
     (collect-garbage)
     (sleep 310)
 
-    ;; TODO: Log time of addition to downloaded
-    ;; At each iteration, loop through and remove
-    ;; the ones that are too old.
-    (fetch-match-loop downloaded)))
+    (fetch-match-loop (cleanse downloaded))))
 
 (module+ main
   (fetch-match-loop))
