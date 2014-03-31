@@ -20,17 +20,24 @@
       (if (equal? filename "")
           (last (string-split url "/"))
           filename))
-    
-    ; Open the input-port from the URL, copy
-    ; everything to the output port for the file
-    (let ([ip (get-pure-port (string->url url))]
-          [op (open-output-file (string-append base-path
-                                               (get-filename))
-                                #:exists 'replace)])
-      (begin
+
+    (define (copy-to-file/close)
+      ;; lsof showed open files, so it became necessary to
+      ;; close them after a copy.
+
+      (let ([ip (get-pure-port (string->url url))]
+            [op (open-output-file (string-append base-path
+                                                 (get-filename))
+                                  #:exists 'replace)])
+
+        ;; copy-port doesn't return, so we can
+        ;; put the closes under without it becoming
+        ;; unreachable
         (copy-port ip op)
         (close-input-port ip)
-        (close-output-port op))))
+        (close-output-port op)))
+    
+    (copy-to-file/close))
   
   (define (get-rss-data)
     ;; Function that fetches RSS and generates
