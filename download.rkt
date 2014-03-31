@@ -115,7 +115,7 @@
         ;; Function that gets the time difference
         ;; between two times, returns seconds
         (- (current-seconds)
-                (cdr (first set))))
+           (cdr (first set))))
 
       (> (time-diff)
          86400))
@@ -129,34 +129,40 @@
       (cleanse (rest set)
                (cons (first set)
                      output))]))
-  
-  (begin
-    (with-handlers ([exn:fail:network?
-                     (lambda (e)
-                       (printf "~a - Failed to connect~n"
-                               (compose-current-time)))])
-      (begin
-        (for-each
-         (lambda (rss-entry)
-           (begin
-             (when (match-rss-item? rss-entry)
-               (begin
-                 (printf "~a - Matched: ~a~n"
-                         (compose-current-time)
-                         (rss-item-title rss-entry))
-                 (url->file (rss-item-link rss-entry)
-                            user-base-path))
-               (set! downloaded
-                     (cons (cons (rss-item-link rss-entry) (current-seconds))
-                           downloaded)))))
-         (get-items (get-rss-data)))
-        (printf "~a - Fetched rss.~n"
-                (compose-current-time))))
-    
-    (collect-garbage)
-    (sleep 310)
 
-    (fetch-match-loop (cleanse downloaded))))
+  (define (check-rss-item rss-entry)
+    ;; Checks an RSS item for matches
+
+    (define (print-match)
+      (printf "~a - Matched: ~a~n"
+              (compose-current-time)
+              (rss-item-title rss-entry)))
+
+    (define (add-item-to-downloaded)
+      (set! downloaded
+            (cons (cons (rss-item-link rss-entry) (current-seconds))
+                  downloaded)))
+    
+    (when (match-rss-item? rss-entry)
+      (print-match)
+      (url->file (rss-item-link rss-entry)
+                 user-base-path)
+      (add-item-to-downloaded)))
+  
+  (with-handlers ([exn:fail:network?
+                   (lambda (e)
+                     (printf "~a - Failed to connect~n"
+                             (compose-current-time)))])
+    (for-each check-rss-item
+              (get-items (get-rss-data)))
+
+    (printf "~a - Fetched rss.~n"
+            (compose-current-time)))
+  
+  (collect-garbage)
+  (sleep 310)
+
+  (fetch-match-loop (cleanse downloaded)))
 
 (module+ main
   (fetch-match-loop))
