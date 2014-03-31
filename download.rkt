@@ -23,10 +23,14 @@
     
     ; Open the input-port from the URL, copy
     ; everything to the output port for the file
-    (copy-port (get-pure-port (string->url url))
-               (open-output-file (string-append base-path
-                                                (get-filename))
-                                 #:exists 'replace)))
+    (let ([ip (get-pure-port (string->url url))]
+          [op (open-output-file (string-append base-path
+                                               (get-filename))
+                                #:exists 'replace)])
+      (begin
+        (copy-port ip op)
+        (close-input-port ip)
+        (close-output-port op))))
   
   (define (get-rss-data)
     ;; Function that fetches RSS and generates
