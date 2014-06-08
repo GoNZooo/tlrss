@@ -158,7 +158,8 @@
 
     (printf "~a - Fetched rss.~n"
             (compose-current-time)))
-  
+  ; Not sure if this is needed, but I figure it will
+  ; be better to have it rather than not.
   (collect-garbage)
   (sleep 310)
 
