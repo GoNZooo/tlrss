@@ -45,7 +45,7 @@
     
     (define (generate-xexpr)
       (define (url->port)
-        (get-pure-port (string->url user-rss-url)))
+        (get-pure-port (string->url (user-rss-url))))
       
       (xml->xexpr
        ((eliminate-whitespace '(item))
@@ -77,16 +77,16 @@
         #f]
        ;; If the regexp we have in 'downloads' matches
        ;; the name of the current rss-item we have a match.
-       [(regexp-match (cdr (first set))
+       [(regexp-match (car set)
                       (rss-item-title i))
         #t]
        ;; Otherwise we move on in the download-set.
        [else
-        (match-downloads (rest set))]))
+        (match-downloads (cdr set))]))
 
     ;; Note that 'downloads' refers to the
     ;; user-defined variable in 'configuration.rkt'.
-    (match-downloads downloads))
+    (match-downloads (user-downloads)))
   
   (define (compose-current-time)
     ;; Formats current time for log/output.
@@ -146,12 +146,16 @@
     (when (match-rss-item? rss-entry)
       (print-match)
       (url->file (rss-item-link rss-entry)
-                 user-base-path)
+                 (user-base-path))
       (add-item-to-downloaded)))
   
   (with-handlers ([exn:fail:network?
                    (lambda (e)
                      (printf "~a - Failed to connect~n"
+                             (compose-current-time)))]
+                  [exn:fail:read?
+                   (lambda (e)
+                     (printf "~a - Failed to read XML~n"
                              (compose-current-time)))])
     (for-each check-rss-item
               (get-items (get-rss-data)))
