@@ -7,7 +7,9 @@
          racket/string
          racket/port
          racket/bool
+         racket/contract
 
+         "macros/human-time.rkt"
          "xml-parse.rkt"
          "configuration.rkt")
 
@@ -22,42 +24,25 @@
           filename))
 
     (define (copy-to-file/close)
-      ;; lsof showed open files, so it became necessary to
-      ;; close them after a copy.
 
       (let ([ip (get-pure-port (string->url url))]
-            [op (open-output-file (string-append base-path
-                                                 (get-filename))
+            [op (open-output-file (build-path base-path
+                                              (get-filename))
                                   #:exists 'replace)])
 
-        ;; copy-port doesn't return, so we can
-        ;; put the closes under without it becoming
-        ;; unreachable
+        ;; copy-port doesn't return, so we can put the
+        ;; closes under without them becoming unreachable
         (copy-port ip op)
         (close-input-port ip)
         (close-output-port op)))
     
     (copy-to-file/close))
   
-  (define (get-rss-data)
-    ;; Function that fetches RSS and generates
-    ;; an x-expression from it.
+  (define/contract (match-rss-item? i)
+    (rss-item? . -> . boolean?)
     
-    (define (generate-xexpr)
-      (define (url->port)
-        (get-pure-port (string->url (user-rss-url))))
-      
-      (xml->xexpr
-       ((eliminate-whitespace '(item))
-        (document-element (read-xml (url->port))))))
-
-    (generate-xexpr))
-  
-  (define (match-rss-item? i)
-    ;; Function that matches an item against
-    ;; user-specified downloads to look for.
-    
-    (define (match-downloads set)
+    (define/contract (match-downloads set)
+      ((listof regexp?) . -> . boolean?)
 
       (define (downloaded? [dl-set downloaded])
         (cond
@@ -86,15 +71,17 @@
 
     ;; Note that 'downloads' refers to the
     ;; user-defined variable in 'configuration.rkt'.
-    (match-downloads (user-downloads)))
+    (match-downloads user-downloads))
   
   (define (compose-current-time)
     ;; Formats current time for log/output.
     
-    (define (leading-zero n)
+    (define/contract (leading-zero n)
+      (number? . -> . string?)
+      
       (if (< n 10)
           (string-append "0" (number->string n))
-          n))
+          (number->string n)))
     
     (let ([cd (current-date)])
       (format "~a-~a-~a ~a:~a:~a"
@@ -105,20 +92,20 @@
               (leading-zero (date-minute cd))
               (leading-zero (date-second cd)))))
 
-  (define (cleanse set [output '()])
-    ;; Function to clear old entries in a set
+  (define/contract (cleanse set [output '()])
+    ((list?) (list?) . ->* . list?)
 
-    (define (too-old?)
-      ;; Function to determine if an entry is too old
+    (define/contract (too-old?)
+      (-> boolean?)
       
-      (define (time-diff)
-        ;; Function that gets the time difference
-        ;; between two times, returns seconds
+      (define/contract (time-diff)
+        (-> number?)
+        
         (- (current-seconds)
            (cdr (first set))))
 
       (> (time-diff)
-         86400))
+         (human-time 24h)))
     
     (cond
      [(null? set) output]
@@ -146,7 +133,7 @@
     (when (match-rss-item? rss-entry)
       (print-match)
       (url->file (rss-item-link rss-entry)
-                 (user-base-path))
+                 user-base-path)
       (add-item-to-downloaded)))
   
   (with-handlers ([exn:fail:network?
@@ -158,14 +145,13 @@
                      (printf "~a - Failed to read XML~n"
                              (compose-current-time)))])
     (for-each check-rss-item
-              (get-items (get-rss-data)))
+              (get-items (get-rss-data user-rss-url)))
 
     (printf "~a - Fetched rss.~n"
             (compose-current-time)))
-  ; Not sure if this is needed, but I figure it will
-  ; be better to have it rather than not.
+  
   (collect-garbage)
-  (sleep 310)
+  (sleep (human-time 5m10s))
 
   (fetch-match-loop (cleanse downloaded)))
 
