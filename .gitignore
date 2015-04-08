@@ -4,3 +4,4 @@ bin/*
 /manual.html~
 /manual.md
 *~*
+*.swp

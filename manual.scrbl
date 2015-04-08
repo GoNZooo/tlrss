@@ -3,32 +3,21 @@
 @(require (for-label racket))
 
 @title[
-#:date "2014-03-09"
+#:date "2015-04-08"
 "Setup"]
 
 Every bit of configuration is to be done in the file @bold{'configuration.rkt'}. This file is imported in @bold{'download.rkt'}.
 
-@section{Base components}
-These are the basic contents of the file that need to be defined exactly as follows. This is so that the right symbols are exported so they can be used in other files.
-
-@codeblock|{
-#lang racket/base
-
-(provide downloads
-	 user-rss-url
-	 user-base-path)
-}|
-
 @subsection{downloads}
-This variable is a list of pairs. The left part (or 'car') of the cell contains the name you want to give the show. This has no bearing on anything at the moment, but is shown here because it makes it fairly readable.
-
-The right part (or cdr) of the cell contains a perl regular expression. The leading @bold{#px} tells Racket that it is in fact a @hyperlink["http://www.anaesthetist.com/mnm/perl/regex.htm" "Perl Regular Expression"] and not a @hyperlink["http://www.regular-expressions.info/posix.html" "POSIX Regular Expression"]. This doesn't matter, as the matching function (@racket[regexp-match]) can use both, so you can replace the @bold{#px} with @bold{#rx} if you feel like it. Note, though, that the shorthands (\\d for digits) used in the examples are only available in perl regexes.
+Download items are specified as follows, with a perl regexpression inside the string on each line.
 
 Example:
 @codeblock|{
-(define downloads
-  (list '("Community" . #px"Community.S05E\\d\\d.720p.*")
-  	'("Archer" . #px"Archer.S05E\\d\\d.720p.*")))
+(downloads
+ "The.Big.Bang.Theory.S07E\\d\\d.720p.*"
+ "Hells.Kitchen.US.S12E\\d\\d.*x264.*"
+ "Game.of.Thrones.S\\d\\dE\\d\\d.720p.*"
+ ".*Legend.[Oo]f.Korra.S03E.*720p.*")
 }|
 
 @subsection{user-rss-url}
@@ -37,7 +26,7 @@ your user. You can find this in the "Profile" section on the page.
 
 Example:
 @codeblock|{
-(define user-rss-url "http://rss.torrentleech.org/<NUMBERS_AND_LETTERS>")
+(rss-url "http://rss.torrentleech.org/<NUMBERS_AND_LETTERS>")
 }|
 
 @subsection{user-base-path}
@@ -45,7 +34,7 @@ This is simply the directory you want to place the downloaded torrent files in. 
 
 Example:
 @codeblock|{
-(define user-base-path "/home/gonz/torrents/torrentfiles/")
+(base-path "<path to torrent file directory>")
 }|
 
 @section{Running the downloader}
@@ -68,4 +57,4 @@ This creates a binary in the current folder called @bold{'rss-downloader'} that 
 
 @codeblock|{$ ./rss-downloader}|
 
-And this will start the program just like it would if it were run without creating the binary.
+And this will start the program just like it would if it were run without creating the binary. Note that this does not improve the performance of the program, as a Racket script will be as performant as the compiled binary created from it.
