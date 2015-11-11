@@ -2,6 +2,7 @@ src/configuration.rkt
 src/db-credentials.rkt
 manual/*
 bin/*
+db/*
 /manual.html~
 /manual.md
 *~*
