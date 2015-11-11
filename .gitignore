@@ -1,4 +1,5 @@
 src/configuration.rkt
+src/db-credentials.rkt
 manual/*
 bin/*
 /manual.html~
