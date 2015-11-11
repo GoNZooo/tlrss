@@ -1,4 +1,4 @@
-configuration.rkt
+src/configuration.rkt
 manual/*
 bin/*
 /manual.html~
