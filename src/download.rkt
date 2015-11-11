@@ -4,6 +4,6 @@
 
          gonz/human-time
 
+         "db.rkt"
          "xml-parse.rkt"
          "configuration.rkt")
-
