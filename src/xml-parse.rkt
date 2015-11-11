@@ -2,8 +2,6 @@
 
 (require racket/match
          xml
-         xml/path
-         racket/list
          net/url
 
          gonz/html-tree
