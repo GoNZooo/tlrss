@@ -22,16 +22,14 @@
   (read-xml input-port))
 
 (define (rss->items rss-data)
-  (find* (xml->xexpr (document-element rss-data))
-         'item))
-
-(define (rss-item-components item)
-  (match item
-    [`(item (,component ...))
-      (filter (lambda (c)
-                (and (not (string? c))
-                     (not (null? c))))
-              component)]))
+  (define item-list (find* (xml->xexpr (document-element rss-data))
+                           'item))
+  (map (lambda (i)
+         (filter (lambda (c)
+                   (and (not (string? c))
+                        (not (null? c))))
+                 (cdr i)))
+       item-list))
 
 (define (item-components->item-hash item-components [output-hash #hash()])
   (define (extract-cdata str)
@@ -80,7 +78,7 @@
                                     output-hash)])))
 
 (define (rss-items #:rss-url [rss-url user-rss-url])
-  (map (compose1 item-components->item-hash rss-item-components)
+  (map (compose1 make-rss-item/struct item-components->item-hash)
        (rss->items (fetch-rss rss-url))))
 
 (define (make-rss-item/struct i)
@@ -101,5 +99,5 @@
   (require racket/pretty)
 
   (pretty-print
-    (map make-rss-item/struct (rss-items))
+    (rss-items)
     ))
