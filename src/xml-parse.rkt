@@ -6,7 +6,7 @@
 
          gonz/html-tree
          gonz/with-matches
-         
+
          "configuration.rkt")
 
 (provide rss-items)
@@ -37,7 +37,7 @@
     (with-matches #px"<!\\[CDATA\\[\\s*(.*)\\s*\\]\\]>" str (m 1)))
 
   (if (null? item-components)
-    output-hash
+    (hash (hash-ref output-hash 'guid) output-hash)
     (match (car item-components)
       [`(title () ,(cdata _ _ title))
         (item-components->item-hash (cdr item-components)
@@ -69,19 +69,9 @@
                                     (hash-set output-hash
                                               'link
                                               (extract-cdata link)))]
-      [`(description () ,(cdata _ _ description))
-        (let*-values ([(extracted-description) (extract-cdata description)]
-                      [(seeders leechers)
-                       (with-matches
-                         #px".*Seeders: (\\d+) - Leechers: (\\d+).*"
-                         extracted-description
-                         (values (m 1) (m 2)))])
-          (item-components->item-hash (cdr item-components)
-                                      (hash-set* output-hash
-                                                 'seeders
-                                                 seeders
-                                                 'leechers
-                                                 leechers)))])))
+      [_
+        (item-components->item-hash (cdr item-components)
+                                    output-hash)])))
 
 (define (rss-items #:rss-url [rss-url user-rss-url])
   (map (compose1 item-components->item-hash rss-item-components)
