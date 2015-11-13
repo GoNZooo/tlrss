@@ -7,7 +7,8 @@
          gonz/html-tree
          gonz/with-matches
 
-         "configuration.rkt")
+         "configuration.rkt"
+         "rss-item.rkt")
 
 (provide rss-items)
 
@@ -35,9 +36,13 @@
 (define (item-components->item-hash item-components [output-hash #hash()])
   (define (extract-cdata str)
     (with-matches #px"<!\\[CDATA\\[\\s*(.*)\\s*\\]\\]>" str (m 1)))
+  (define (extract-guid guid-url)
+    (with-matches #px"https://www.torrentleech.org/torrent/(\\d*)"
+                  guid-url
+                  (m 1)))
 
   (if (null? item-components)
-    (hash (hash-ref output-hash 'guid) output-hash)
+    (cons (hash-ref output-hash 'guid) output-hash)
     (match (car item-components)
       [`(title () ,(cdata _ _ title))
         (item-components->item-hash (cdr item-components)
@@ -54,11 +59,12 @@
                                     (hash-set output-hash
                                               'category
                                               category))]
-      [`(guid () ,guid)
+      [`(guid () ,guid-url)
         (item-components->item-hash (cdr item-components)
                                     (hash-set output-hash
                                               'guid
-                                              guid))]
+                                              (string->number
+                                                (extract-guid guid-url))))]
       [`(comments () ,(cdata _ _ comments))
         (item-components->item-hash (cdr item-components)
                                     (hash-set output-hash
@@ -77,9 +83,25 @@
   (map (compose1 item-components->item-hash rss-item-components)
        (rss->items (fetch-rss rss-url))))
 
+(define (make-rss-item/struct i)
+  (define data (cdr i))
+  (item (car i)
+        (torrent (hash-ref data
+                           'title)
+                 (hash-ref data
+                           'category)
+                 (hash-ref data
+                           'guid)
+                 (hash-ref data
+                           'comments)
+                 (hash-ref data
+                           'added)
+                 (hash-ref data
+                           'link))))
+
 (module+ main
   (require racket/pretty)
 
   (pretty-print
-    (rss-items)
+    (map make-rss-item/struct (rss-items))
     ))

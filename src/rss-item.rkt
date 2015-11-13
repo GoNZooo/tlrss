@@ -1,32 +1,41 @@
-#lang racket/base
+#lang typed/racket/base
 
 (provide item-title
          item-category
          item-guid
          item-comments
          item-added
-         item-link)
+         item-link
+         (struct-out item)
+         (struct-out torrent))
 
-(define (item-title item-pair)
-  (hash-ref (cdr item-pair)
-            'item))
+(struct torrent ([title : String]
+                 [category : String]
+                 [guid : Integer]
+                 [comments : String]
+                 [added : String]
+                 [link : String])
+        #:transparent)
 
-(define (item-category item-pair)
-  (hash-ref (cdr item-pair)
-            'category))
+(struct item ([guid : Integer] [data : torrent])
+        #:transparent)
 
-(define (item-guid item-pair)
-  (hash-ref (cdr item-pair)
-            'guid))
+(: item-title (-> item String))
+(define (item-title i)
+  (torrent-title (item-data i)))
 
-(define (item-comments item-pair)
-  (hash-ref (cdr item-pair)
-            'comments))
+(: item-category (-> item String))
+(define (item-category i)
+  (torrent-category (item-data i)))
 
-(define (item-added item-pair)
-  (hash-ref (cdr item-pair)
-            'added))
+(: item-comments (-> item String))
+(define (item-comments i)
+  (torrent-comments (item-data i)))
 
-(define (item-link item-pair)
-  (hash-ref (cdr item-pair)
-            'link))
+(: item-added (-> item String))
+(define (item-added i)
+  (torrent-added (item-data i)))
+
+(: item-link (-> item String))
+(define (item-link i)
+  (torrent-link (item-data i)))
