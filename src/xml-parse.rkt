@@ -86,18 +86,16 @@
 (define (make-rss-item/struct i)
   (define data (cdr i))
   (item (car i)
-        (torrent (hash-ref data
-                           'title)
-                 (hash-ref data
-                           'category)
-                 (hash-ref data
-                           'guid)
-                 (hash-ref data
-                           'comments)
-                 (hash-ref data
-                           'added)
-                 (hash-ref data
-                           'link))))
+        (hash-ref data
+                  'title)
+        (hash-ref data
+                  'category)
+        (hash-ref data
+                  'comments)
+        (hash-ref data
+                  'added)
+        (hash-ref data
+                  'link)))
 
 (module+ main
   (require racket/pretty)
