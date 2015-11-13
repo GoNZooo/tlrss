@@ -58,6 +58,17 @@
 
 (define-type (Maybe a) (U False a))
 
+(: item-vector? (-> Any Boolean))
+(define (item-vector? v)
+  (and (immutable? v)
+       (vector? v)
+       (integer? (vector-ref v 0))
+       (string? (vector-ref v 1))
+       (string? (vector-ref v 2))
+       (string? (vector-ref v 3))
+       (string? (vector-ref v 4))
+       (string? (vector-ref v 5))))
+
 (define-type Item-Vector (Vector Integer
                                  String
                                  String
@@ -65,15 +76,14 @@
                                  String
                                  String))
 
-(: row->item (-> Item-Vector
-                 item))
+(: row->item (-> Item-Vector item))
 (define (row->item row)
-  (item (vector-ref row 0)
-        (vector-ref row 1)
-        (vector-ref row 2)
-        (vector-ref row 3)
-        (vector-ref row 4)
-        (vector-ref row 5)))
+    (item (vector-ref row 0)
+          (vector-ref row 1)
+          (vector-ref row 2)
+          (vector-ref row 3)
+          (vector-ref row 4)
+          (vector-ref row 5)))
 
 (: db/get/seen/title (-> String (Maybe item)))
 (define (db/get/seen/title title)
@@ -85,9 +95,8 @@
                          "SELECT * FROM seen WHERE title = $1"
                          title))))
 
-  (and result
-       (row->item (cast result
-                        Item-Vector))))
+  (and (item-vector? result)
+       (row->item (cast result Item-Vector))))
 
 (: db/get/seen/guid (-> Integer (Maybe item)))
 (define (db/get/seen/guid guid)
@@ -99,6 +108,5 @@
                          "SELECT * FROM seen WHERE guid = $1"
                          guid))))
 
-  (and result
-       (row->item (cast result
-                        Item-Vector))))
+  (and (item-vector? result)
+       (row->item (cast result Item-Vector))))
