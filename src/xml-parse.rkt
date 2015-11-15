@@ -22,14 +22,8 @@
   (read-xml input-port))
 
 (define (rss->items rss-data)
-  (define item-list (find* (xml->xexpr (document-element rss-data))
-                           'item))
-  (map (lambda (i)
-         (filter (lambda (c)
-                   (and (not (string? c))
-                        (not (null? c))))
-                 (cdr i)))
-       item-list))
+  (find* (xml->xexpr (document-element rss-data))
+         'item))
 
 (define (item-components->item-hash item-components [output-hash #hash()])
   (define (extract-cdata str)
