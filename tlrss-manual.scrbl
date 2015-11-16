@@ -1,11 +1,13 @@
-#lang scribble/manual
+#lang scribble/doc
 
-@(require (for-label racket))
+@(require (for-label racket)
+          scribble/manual
+          scribble/basic
+          scribble/extract)
 
-@title[
-#:date "2015-04-08"
-"Setup"]
+@title{TLRSS}
 
+@section{Configuration}
 Every bit of configuration is to be done in the file @bold{'configuration.rkt'}. This file is imported in @bold{'download.rkt'}.
 
 @subsection{downloads}
@@ -14,10 +16,10 @@ Download items are specified as follows, with a perl regexpression inside the st
 Example:
 @codeblock|{
 (downloads
- "The.Big.Bang.Theory.S07E\\d\\d.720p.*"
- "Hells.Kitchen.US.S12E\\d\\d.*x264.*"
- "Game.of.Thrones.S\\d\\dE\\d\\d.720p.*"
- ".*Legend.[Oo]f.Korra.S03E.*720p.*")
+  "The.Big.Bang.Theory.S07E\\d\\d.720p.*"
+  "Hells.Kitchen.US.S12E\\d\\d.*x264.*"
+  "Game.of.Thrones.S\\d\\dE\\d\\d.720p.*"
+  ".*Legend.[Oo]f.Korra.S03E.*720p.*")
 }|
 
 @subsection{user-rss-url}
