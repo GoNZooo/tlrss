@@ -7,3 +7,7 @@ db/*
 /manual.md
 *~*
 *.swp
+compiled/
+doc/
+src/compiled/
+src/macros/compiled/
