@@ -30,46 +30,46 @@
     (with-matches #px"<!\\[CDATA\\[\\s*(.*)\\s*\\]\\]>" str (m 1)))
   (define (extract-guid guid-url)
     (with-matches #px"https://www.torrentleech.org/torrent/(\\d*)"
-                  guid-url
-                  (m 1)))
+      guid-url
+      (m 1)))
 
   (if (null? item-components)
-    (cons (hash-ref output-hash 'guid) output-hash)
-    (match (car item-components)
-      [`(title () ,(cdata _ _ title))
-        (item-components->item-hash (cdr item-components)
-                                    (hash-set output-hash
-                                              'title
-                                              (extract-cdata title)))]
-      [`(pubDate () ,pub-date)
-        (item-components->item-hash (cdr item-components)
-                                    (hash-set output-hash
-                                              'added
-                                              pub-date))]
-      [`(category () ,category)
-        (item-components->item-hash (cdr item-components)
-                                    (hash-set output-hash
-                                              'category
-                                              category))]
-      [`(guid () ,guid-url)
-        (item-components->item-hash (cdr item-components)
-                                    (hash-set output-hash
-                                              'guid
-                                              (string->number
+      (cons (hash-ref output-hash 'guid) output-hash)
+      (match (car item-components)
+        [`(title () ,(cdata _ _ title))
+         (item-components->item-hash (cdr item-components)
+                                     (hash-set output-hash
+                                               'title
+                                               (extract-cdata title)))]
+        [`(pubDate () ,pub-date)
+         (item-components->item-hash (cdr item-components)
+                                     (hash-set output-hash
+                                               'added
+                                               pub-date))]
+        [`(category () ,category)
+         (item-components->item-hash (cdr item-components)
+                                     (hash-set output-hash
+                                               'category
+                                               category))]
+        [`(guid () ,guid-url)
+         (item-components->item-hash (cdr item-components)
+                                     (hash-set output-hash
+                                               'guid
+                                               (string->number
                                                 (extract-guid guid-url))))]
-      [`(comments () ,(cdata _ _ comments))
-        (item-components->item-hash (cdr item-components)
-                                    (hash-set output-hash
-                                              'comments
-                                              (extract-cdata comments)))]
-      [`(link () ,(cdata _ _ link))
-        (item-components->item-hash (cdr item-components)
-                                    (hash-set output-hash
-                                              'link
-                                              (extract-cdata link)))]
-      [_
-        (item-components->item-hash (cdr item-components)
-                                    output-hash)])))
+        [`(comments () ,(cdata _ _ comments))
+         (item-components->item-hash (cdr item-components)
+                                     (hash-set output-hash
+                                               'comments
+                                               (extract-cdata comments)))]
+        [`(link () ,(cdata _ _ link))
+         (item-components->item-hash (cdr item-components)
+                                     (hash-set output-hash
+                                               'link
+                                               (extract-cdata link)))]
+        [_
+         (item-components->item-hash (cdr item-components)
+                                     output-hash)])))
 
 (define (rss-items #:rss-url [rss-url user-rss-url])
   (map (compose1 make-rss-item/struct item-components->item-hash)
@@ -93,5 +93,5 @@
   (require racket/pretty)
 
   (pretty-print
-    (rss-items)
-    ))
+   (rss-items)
+   ))

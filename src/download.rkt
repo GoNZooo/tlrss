@@ -17,11 +17,11 @@
 (define (seen?/title title)
   (db/get/seen/title title))
 (provide/doc
-   (proc-doc/names
-     seen?/title
-     (-> string? boolean?)
-     (x)
-     @{Fuck.}))
+ (proc-doc/names
+  seen?/title
+  (-> string? boolean?)
+  (x)
+  @{Fuck.}))
 
 (define (seen?/guid guid)
   (db/get/seen/guid guid))
